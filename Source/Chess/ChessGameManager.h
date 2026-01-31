@@ -96,6 +96,7 @@ private:
 	void NewGame();
 	void SetUpBoard();
 	void SetUpDebugBoard();
+	void SpawnPiece(int i, int j, TSubclassOf<AChessPiecePType> cls, ETeam team);
 	void FindAndStoreKingPositions();
 	void SpawnSquares();
 	bool IsSquareValid(int i, int j);
@@ -123,6 +124,7 @@ private:
 
 	void FaceNearestEnemy(AChessPiecePType* thisPiece);
 
+	EPiece GetPieceTypeFromSubclass(TSubclassOf<AChessPiecePType> cls);
 protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ASquare> squareClassWhite;
@@ -170,4 +172,5 @@ private:
 
 	float checkMateWaitTime = 3.f;
 	float checkMateCounter = 0.f;
+
 };

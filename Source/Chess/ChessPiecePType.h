@@ -28,6 +28,7 @@ class CHESS_API AChessPiecePType : public APawn
 	GENERATED_BODY()
 
 public:
+
 	// Sets default values for this pawn's properties
 	AChessPiecePType();
 	virtual void Tick(float DeltaTime) override;

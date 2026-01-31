@@ -134,61 +134,35 @@ void AChessGameManager::SetUpDebugBoard()
 		UWorld* w = GetWorld();
 		ensure(w);
 
-		ASquare* sq = grid[0][1];
-		FRotator r = FRotator{ 0, 0, 0 };
-		r.Yaw = faceWhite;
-		FActorSpawnParameters p{};
-		p.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		FVector v = sq->GetPieceLocation();
-		AChessPiecePType* piece = w->SpawnActor<AChessPiecePType>(queenClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 1);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Queen);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[4][5];
-		v = sq->GetPieceLocation();
-		r.Yaw = faceWhite;
-		piece = w->SpawnActor<AChessPiecePType>(kingClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(4, 5);
-		piece->ReceiveEPieceTypeAllocation(EPiece::King);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[2][5];
-		v = sq->GetPieceLocation();
-		r.Yaw = faceWhite;
-		piece = w->SpawnActor<AChessPiecePType>(rookClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(2, 5);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Rook);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][0];
-		v = sq->GetPieceLocation();
-		r.Yaw = faceBlack;
-		piece = w->SpawnActor<AChessPiecePType>(queenClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(0, 0);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Queen);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[6][6];
-		v = sq->GetPieceLocation();
-		r.Yaw = faceBlack;
-		piece = w->SpawnActor<AChessPiecePType>(kingClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(6, 6);
-		piece->ReceiveEPieceTypeAllocation(EPiece::King);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
+		SpawnPiece(0, 1, queenClass, ETeam::Black);
+		SpawnPiece(4, 5, kingClass, ETeam::Black);
+		SpawnPiece(2, 5, rookClass, ETeam::Black);
+		SpawnPiece(0, 0, queenClass, ETeam::White);
+		SpawnPiece(6, 6, kingClass, ETeam::White);
 	}
 
 	PostBoardSetup(); // to blueprints
+}
+
+void AChessGameManager::SpawnPiece(int i, int j, TSubclassOf<AChessPiecePType> cls, ETeam team)
+{
+	ASquare* sq = grid[i][j];
+	FVector v = sq->GetPieceLocation();
+	FActorSpawnParameters p{};
+	p.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	FRotator r{};
+	r.Yaw = team == ETeam::White ? faceBlack : faceWhite;
+	UWorld* w = GetWorld();
+	AChessPiecePType* piece = w->SpawnActor<AChessPiecePType>(
+		cls, v, r, p);
+								
+	piece->SetTeam(team);
+	piece->ReceiveCoordinates(i, j);
+	EPiece type = GetPieceTypeFromSubclass(cls);
+	piece->ReceiveEPieceTypeAllocation(type);
+	allPieces.Push(piece);
+	sq->ReceivePiece(piece);
 }
 
 void AChessGameManager::FindAndStoreKingPositions()
@@ -229,185 +203,35 @@ void AChessGameManager::SetUpBoard()
 		UWorld* w = GetWorld();
 		ensure(w);
 
-		ASquare* sq = grid[0][0];
-		FVector v = sq->GetPieceLocation();
-		FRotator r = FRotator{ 0, 0, 0 };
-		r.Yaw = faceWhite;
-		FActorSpawnParameters p{};
-		p.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AChessPiecePType* piece = w->SpawnActor<AChessPiecePType>(rookClass, v, r, p);
-
-		if (ensure(piece)) {
-			piece->SetTeam(ETeam::Black);
-			piece->ReceiveCoordinates(0, 0);
-			piece->ReceiveEPieceTypeAllocation(EPiece::Rook);
-			allPieces.Push(piece);
-			sq->ReceivePiece(piece);
-		}
-
-		sq = grid[0][1];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(knightClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 1);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Knight);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][2];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(bishopClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 2);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Bishop);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][3];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(kingClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 3);
-		piece->ReceiveEPieceTypeAllocation(EPiece::King);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][4];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(queenClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 4);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Queen);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][5];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(bishopClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 5);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Bishop);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][6];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(knightClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 6);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Knight);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[0][7];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(rookClass, v, r, p);
-		piece->SetTeam(ETeam::Black);
-		piece->ReceiveCoordinates(0, 7);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Rook);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
+		SpawnPiece(0, 0, rookClass, ETeam::Black);
+		SpawnPiece(0, 1, knightClass, ETeam::Black);
+		SpawnPiece(0, 2, bishopClass, ETeam::Black);
+		SpawnPiece(0, 3, kingClass, ETeam::Black);
+		SpawnPiece(0, 4, queenClass, ETeam::Black);
+		SpawnPiece(0, 5, bishopClass, ETeam::Black);
+		SpawnPiece(0, 6, knightClass, ETeam::Black);
+		SpawnPiece(0, 7, rookClass, ETeam::Black);
 
 		for (int i = 0; i < 8; i++) {
-			sq = grid[1][i];
-			v = sq->GetPieceLocation();
-			piece = w->SpawnActor<AChessPiecePType>(pawnClass, v, r, p);
-			piece->SetTeam(ETeam::Black);
-			piece->ReceiveCoordinates(1, i);
-			piece->ReceiveEPieceTypeAllocation(EPiece::Pawn);
-			allPieces.Push(piece);
-			sq->ReceivePiece(piece);
+			SpawnPiece(1, i, pawnClass, ETeam::Black);
 		}
 
-		sq = grid[7][0];
-		v = sq->GetPieceLocation();
-		r.Yaw = faceBlack;
-		piece = w->SpawnActor<AChessPiecePType>(rookClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 0);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Rook);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][1];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(knightClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 1);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Knight);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][2];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(bishopClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 2);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Bishop);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][3];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(kingClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 3);
-		piece->ReceiveEPieceTypeAllocation(EPiece::King);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][4];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(queenClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 4);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Queen);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][5];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(bishopClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 5);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Bishop);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][6];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(knightClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 6);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Knight);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
-
-		sq = grid[7][7];
-		v = sq->GetPieceLocation();
-		piece = w->SpawnActor<AChessPiecePType>(rookClass, v, r, p);
-		piece->SetTeam(ETeam::White);
-		piece->ReceiveCoordinates(7, 7);
-		piece->ReceiveEPieceTypeAllocation(EPiece::Rook);
-		allPieces.Push(piece);
-		sq->ReceivePiece(piece);
+		SpawnPiece(7, 0, rookClass, ETeam::White);
+		SpawnPiece(7, 1, knightClass, ETeam::White);
+		SpawnPiece(7, 2, bishopClass, ETeam::White);
+		SpawnPiece(7, 3, kingClass, ETeam::White);
+		SpawnPiece(7, 4, queenClass, ETeam::White);
+		SpawnPiece(7, 5, bishopClass, ETeam::White);
+		SpawnPiece(7, 6, knightClass, ETeam::White);
+		SpawnPiece(7, 7, rookClass, ETeam::White);
 
 		for (int i = 0; i < 8; i++) {
-			sq = grid[6][i];
-			v = sq->GetPieceLocation();
-			piece = w->SpawnActor<AChessPiecePType>(pawnClass, v, r, p);
-			piece->SetTeam(ETeam::White);
-			piece->ReceiveCoordinates(6, i);
-			piece->ReceiveEPieceTypeAllocation(EPiece::Pawn);
-			allPieces.Push(piece);
-			sq->ReceivePiece(piece);
+			SpawnPiece(6, i, pawnClass, ETeam::White);
 		}
 	}
 
 	PostBoardSetup();
 }
-
-
 
 void AChessGameManager::SpawnSquares()
 {
@@ -865,6 +689,31 @@ void AChessGameManager::FaceNearestEnemy(AChessPiecePType* thisPiece)
 
 	FRotator r = KM::FindLookAtRotation(v1, closestTarget);
 	thisPiece->SetActorRotation(r);
+}
+
+EPiece AChessGameManager::GetPieceTypeFromSubclass(TSubclassOf<AChessPiecePType> cls)
+{
+	if (cls == kingClass) {
+		return EPiece::King;
+	}
+	else if (cls == queenClass) {
+		return EPiece::Queen;
+	}
+	else if (cls == rookClass) {
+		return EPiece::Rook;
+	}
+	else if (cls == knightClass) {
+		return EPiece::Knight;
+	}
+	else if (cls == bishopClass) {
+		return EPiece::Bishop;
+	}
+	else if (cls == pawnClass) {
+		return EPiece::Pawn;
+	}
+
+	ensure(false);
+	return EPiece::Pawn;
 }
 
 void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
