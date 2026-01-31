@@ -13,7 +13,6 @@ class CHESS_API ASquare : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ASquare();
 	virtual void Tick(float DeltaTime) override;
 
@@ -24,7 +23,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void RemoveAsValidMove();
 	
-	AChessPiecePType* GetOccupyingPiece() const;
+	AChessPiecePType* GetOccupyingPiece() const { return occupyingPiece; };
 	void SetIsVacant();
 	bool GetIsVacant() const;
 	bool GetSquareHasKing(ETeam kingsTeam) const;
@@ -36,9 +35,9 @@ public:
 	void SetSelectableIndicator(bool visible);
 	
 	UFUNCTION(BlueprintCallable)
-	int GetI() const;
+	int GetI() const { return i; };
 	UFUNCTION(BlueprintCallable)
-	int GetJ() const;
+	int GetJ() const { return j; };
 	FVector GetPieceLocation();
 
 	void CheckmateAction();

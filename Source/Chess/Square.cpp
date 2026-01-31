@@ -3,12 +3,10 @@
 
 #include "Square.h"
 
-// Sets default values
+
 ASquare::ASquare()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 void ASquare::BeginPlay()
@@ -39,11 +37,6 @@ void ASquare::ReceivePiece(AChessPiecePType* piece)
 	occupyingPiece = piece;
 }
 
-AChessPiecePType* ASquare::GetOccupyingPiece() const
-{
-	return occupyingPiece;
-}
-
 void ASquare::SetIsVacant()
 {
 	occupyingPiece = nullptr;
@@ -72,17 +65,6 @@ bool ASquare::GetSquareHasKing() const
 		}
 	}
 	return false;
-}
-
-
-int ASquare::GetI() const
-{
-	return i;
-}
-
-int ASquare::GetJ() const
-{
-	return j;
 }
 
 FVector ASquare::GetPieceLocation()

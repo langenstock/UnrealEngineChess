@@ -5,7 +5,6 @@
 
 void UAnimNotify_FinishAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	int a = 1;
 }
 
 void UAnimNotify_FinishAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)

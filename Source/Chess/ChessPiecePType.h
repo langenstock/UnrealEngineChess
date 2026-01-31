@@ -28,8 +28,6 @@ class CHESS_API AChessPiecePType : public APawn
 	GENERATED_BODY()
 
 public:
-
-	// Sets default values for this pawn's properties
 	AChessPiecePType();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -96,9 +94,7 @@ protected:
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	EPiece ePiece;
-	//bool hasMoved = false; // TODO DL replace with counter
 	int movesMade = 0;
-	// and reduce the counter when undo move etc.
 	ETeam team;
 	bool inFocus = false;
 	int squareI;
@@ -107,7 +103,6 @@ protected:
 	int previousI = -1; // -1 means they haven't moved yet
 	int previousJ = -1;
 
-	//bool lastMoveWasAttack = false;
 	UPROPERTY(EditAnywhere)
 	float moveSpeed = 10.f;
 	FVector moveTarget{};

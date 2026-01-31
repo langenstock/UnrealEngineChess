@@ -28,7 +28,6 @@ void AChessPiecePType::Tick(float DeltaTime)
 
 		if (KM::EqualEqual_RotatorRotator(rot, newRot, 30.f)) {
 			SetActorRotation(targetRotation);
-			
 			// the transition to PostAttack happens from anim notify
 		}
 		
@@ -36,19 +35,13 @@ void AChessPiecePType::Tick(float DeltaTime)
 		FVector step = GetActorLocation() + moveSpeed * KM::GetDirectionUnitVector(GetActorLocation(), moveTarget);
 		SetActorLocation(step);
 		
-		//FVector nextStep = KM::VLerp(GetActorLocation(), moveTarget, DeltaTime);
-		//FVector nextStep = KM::VInterpTo(GetActorLocation(), moveTarget, DeltaTime, interpSpeed);
-		//SetActorLocation(nextStep);
 		float gracePoint = (IsValid(attackTarget)) ? 200.f : 20.f;
 		if ((KM::Vector_Distance(GetActorLocation(), moveTarget)) < gracePoint) {
 			if (attackTarget) {
 				pieceState = EPieceState::Attack;
 			}
 			else {
-				//pieceState = EPieceState::PostAttack;
 				SetActorLocation(moveTarget);
-				// TODO DL we need to somehow call the OnAttackFinished
-				// // which was previous bound in blueprints
 				OnReadyToTeleport();
 			}
 		}
@@ -104,12 +97,10 @@ void AChessPiecePType::ReceiveCoordinates(int i, int j)
 	squareJ = j;
 }
 
-
 void AChessPiecePType::SetIsInFocus(bool isInFocus) {
 	inFocus = isInFocus;
 	BP_SetIsInFocus(isInFocus);
 }
-
 
 void AChessPiecePType::SetMoveTarget(FVector target, int sqI, int sqJ) {
 	previousI = squareI;
@@ -153,7 +144,7 @@ void AChessPiecePType::OnReadyToTeleport()
 	// This is called from AnimNotify_FinishAttack
 	pieceState = EPieceState::PostAttack;
 	bool isAttack = IsValid(attackTarget);
-	BP_OnReadyToTeleport(isAttack); // spawn VFX and SFX at location
+	BP_OnReadyToTeleport(isAttack);
 
 	SetActorLocation(moveTarget);
 	if (attackTarget) {
