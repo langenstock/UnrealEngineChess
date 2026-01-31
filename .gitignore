@@ -1,0 +1,17 @@
+# ===== Unreal Engine =====
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# ===== Visual Studio =====
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# ===== Build artifacts =====
+*.pdb
+*.obj
+*.log
