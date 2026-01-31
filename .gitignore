@@ -3,6 +3,12 @@ Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
+Config/
+Content/
+Platforms/
+Plugins/
+SFX_Export/
+Chess_WwiseProject/
 
 # ===== Visual Studio =====
 .vs/
@@ -10,6 +16,8 @@ Saved/
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+*.vsconfig
+*.uproject
 
 # ===== Build artifacts =====
 *.pdb
