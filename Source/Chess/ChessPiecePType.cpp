@@ -14,51 +14,51 @@ AChessPiecePType::AChessPiecePType()
 void AChessPiecePType::BeginPlay()
 {
 	Super::BeginPlay();
-	anchorLocation = GetActorLocation();
+	m_AnchorLocation = GetActorLocation();
 }
 
 void AChessPiecePType::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (pieceState == EPieceState::Moving) {
+	if (m_PieceState == EPieceState::Moving) {
 		FRotator rot = GetActorRotation();
-		FRotator newRot = KM::RInterpTo(rot, targetRotation, DeltaTime, rotationSpeed);		
+		FRotator newRot = KM::RInterpTo(rot, m_TargetRotation, DeltaTime, rotationSpeed);		
 		SetActorRotation(newRot);
 
 		if (KM::EqualEqual_RotatorRotator(rot, newRot, 30.f)) {
-			SetActorRotation(targetRotation);
+			SetActorRotation(m_TargetRotation);
 			// the transition to PostAttack happens from anim notify
 		}
 		
 		float interpSpeed = 1.f;
-		FVector step = GetActorLocation() + moveSpeed * KM::GetDirectionUnitVector(GetActorLocation(), moveTarget);
+		FVector step = GetActorLocation() + moveSpeed * KM::GetDirectionUnitVector(GetActorLocation(), m_MoveTarget);
 		SetActorLocation(step);
 		
-		float gracePoint = (IsValid(attackTarget)) ? 200.f : 20.f;
-		if ((KM::Vector_Distance(GetActorLocation(), moveTarget)) < gracePoint) {
-			if (attackTarget) {
-				pieceState = EPieceState::Attack;
+		float gracePoint = (IsValid(m_AttackTarget)) ? 200.f : 20.f;
+		if ((KM::Vector_Distance(GetActorLocation(), m_MoveTarget)) < gracePoint) {
+			if (m_AttackTarget) {
+				m_PieceState = EPieceState::Attack;
 			}
 			else {
-				SetActorLocation(moveTarget);
+				SetActorLocation(m_MoveTarget);
 				OnReadyToTeleport();
 			}
 		}
 	}
-	else if (pieceState == EPieceState::PostAttack) {
-		postAttackTime += DeltaTime;
-		if (postAttackTime > postAttackWaitTime) {
-			postAttackTime = 0.f;
-			pieceState = EPieceState::Idle;
-			anchorLocation = GetActorLocation();
+	else if (m_PieceState == EPieceState::PostAttack) {
+		m_PostAttackTime += DeltaTime;
+		if (m_PostAttackTime > postAttackWaitTime) {
+			m_PostAttackTime = 0.f;
+			m_PieceState = EPieceState::Idle;
+			m_AnchorLocation = GetActorLocation();
 		}
 	}
-	else if (pieceState == EPieceState::Death) {
-		deathTimer += DeltaTime;
-		if (deathTimer > deathCleanUpTime) {
-			deathTimer = 0.f;
-			pieceState = EPieceState::DeathCleanUp;
+	else if (m_PieceState == EPieceState::Death) {
+		m_DeathTimer += DeltaTime;
+		if (m_DeathTimer > deathCleanUpTime) {
+			m_DeathTimer = 0.f;
+			m_PieceState = EPieceState::DeathCleanUp;
 		}
 	}
 }
@@ -77,84 +77,84 @@ void AChessPiecePType::ReceiveEPieceTypeAllocation(EPiece ep)
 
 void AChessPiecePType::IncrementMovesMade()
 {
-	movesMade++;
+	m_MovesMade++;
 }
 
 void AChessPiecePType::DecrementMovesMade()
 {
-	ensure(--movesMade >= 0);
+	ensure(--m_MovesMade >= 0);
 }
 
 void AChessPiecePType::SetTeam(ETeam t)
 {
-	team = t;
+	m_Team = t;
 	BP_ReceiveTeamAllocation(t); // to blueprints
 }
 
 void AChessPiecePType::ReceiveCoordinates(int i, int j)
 {
-	squareI = i;
-	squareJ = j;
+	m_SquareI = i;
+	m_SquareJ = j;
 }
 
 void AChessPiecePType::SetIsInFocus(bool isInFocus) {
-	inFocus = isInFocus;
+	m_InFocus = isInFocus;
 	BP_SetIsInFocus(isInFocus);
 }
 
 void AChessPiecePType::SetMoveTarget(FVector target, int sqI, int sqJ) {
-	previousI = squareI;
-	previousJ = squareJ;
-	pieceState = EPieceState::Moving;
-	moveTarget = target;
-	attackTarget = nullptr;
-	squareI = sqI; // this is updated in gameManager after the move
-	squareJ = sqJ;
+	m_PreviousI = m_SquareI;
+	m_PreviousJ = m_SquareJ;
+	m_PieceState = EPieceState::Moving;
+	m_MoveTarget = target;
+	m_AttackTarget = nullptr;
+	m_SquareI = sqI; // this is updated in gameManager after the move
+	m_SquareJ = sqJ;
 
-	StartTargetMove(moveTarget);
+	StartTargetMove(m_MoveTarget);
 }
 
 void AChessPiecePType::StartTargetMove(FVector loc)
 {
-	pieceState = EPieceState::Moving;
-	moveTarget = loc;
-	targetRotation = KM::FindLookAtRotation(this->GetActorLocation(), moveTarget);
+	m_PieceState = EPieceState::Moving;
+	m_MoveTarget = loc;
+	m_TargetRotation = KM::FindLookAtRotation(this->GetActorLocation(), m_MoveTarget);
 }
 
 void AChessPiecePType::SetTargetAttack(AChessPiecePType* target, int sqI, int sqJ)
 {
-	previousI = squareI;
-	previousJ = squareJ;
-	pieceState = EPieceState::Moving;
-	moveTarget = target->GetActorLocation();
-	attackTarget = target;
-	squareI = sqI; // this is updated in gameManager after the move
-	squareJ = sqJ;
+	m_PreviousI = m_SquareI;
+	m_PreviousJ = m_SquareJ;
+	m_PieceState = EPieceState::Moving;
+	m_MoveTarget = target->GetActorLocation();
+	m_AttackTarget = target;
+	m_SquareI = sqI; // this is updated in gameManager after the move
+	m_SquareJ = sqJ;
 
-	StartTargetMove(moveTarget);
+	StartTargetMove(m_MoveTarget);
 }
 
 void AChessPiecePType::SetPieceStateToIdle()
 {
-	pieceState = EPieceState::Idle;
+	m_PieceState = EPieceState::Idle;
 }
 
 void AChessPiecePType::OnReadyToTeleport()
 {
 	// This is called from AnimNotify_FinishAttack
-	pieceState = EPieceState::PostAttack;
-	bool isAttack = IsValid(attackTarget);
+	m_PieceState = EPieceState::PostAttack;
+	bool isAttack = IsValid(m_AttackTarget);
 	BP_OnReadyToTeleport(isAttack);
 
-	SetActorLocation(moveTarget);
-	if (attackTarget) {
-		EvaluateImpactSFX(attackTarget);
-		attackTarget->Kill();
+	SetActorLocation(m_MoveTarget);
+	if (m_AttackTarget) {
+		EvaluateImpactSFX(m_AttackTarget);
+		m_AttackTarget->Kill();
 	}
 }
 
 void AChessPiecePType::Kill()
 {
-	pieceState = EPieceState::Death;
+	m_PieceState = EPieceState::Death;
 	BP_OnDeath(); // to blueprints
 }

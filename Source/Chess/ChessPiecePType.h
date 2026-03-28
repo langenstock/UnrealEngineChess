@@ -34,22 +34,22 @@ public:
 
 	void ReceiveEPieceTypeAllocation(EPiece ep);
 	EPiece GetEPieceType() const { return ePiece; };
-	bool GetHasMoved() const { return (movesMade != 0); };
+	bool GetHasMoved() const { return (m_MovesMade != 0); };
 	UFUNCTION(BlueprintCallable)
-	int GetMovesMade() const { return movesMade; };
+	int GetMovesMade() const { return m_MovesMade; };
 	void IncrementMovesMade();
 	void DecrementMovesMade();
 	void SetTeam(ETeam t);
-	ETeam GetTeam() const {	return team; };
+	ETeam GetTeam() const {	return m_Team; };
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_ReceiveTeamAllocation(ETeam t);
 	UFUNCTION(BlueprintCallable)
-	int GetSquareI() const { return squareI; };
+	int GetSquareI() const { return m_SquareI; };
 	UFUNCTION(BlueprintCallable)
-	int GetSquareJ() const { return squareJ; };
-	int GetPreviousI() const { return previousI; };
-	int GetPreviousJ() const { return previousJ; };
-	AChessPiecePType* GetAttackTarget() const { return attackTarget; };
+	int GetSquareJ() const { return m_SquareJ; };
+	int GetPreviousI() const { return m_PreviousI; };
+	int GetPreviousJ() const { return m_PreviousJ; };
+	AChessPiecePType* GetAttackTarget() const { return m_AttackTarget; };
 	void ReceiveCoordinates(int i, int j);
 	void SetIsInFocus(bool isInFocus);
 	UFUNCTION(BlueprintImplementableEvent)
@@ -65,7 +65,7 @@ public:
 	void BP_AttackTarget(AChessPiecePType* target);
 
 	UFUNCTION(BlueprintCallable)
-	EPieceState GetPieceState() const {	return pieceState; };
+	EPieceState GetPieceState() const {	return m_PieceState; };
 	void SetPieceStateToIdle();
 	UFUNCTION(BlueprintCallable)
 	void OnReadyToTeleport();
@@ -86,7 +86,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintPure)
-	float GetPostAttackTime() const { return postAttackTime; };
+	float GetPostAttackTime() const { return m_PostAttackTime; };
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void EvaluateImpactSFX(AChessPiecePType* target);
@@ -94,30 +94,41 @@ protected:
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	EPiece ePiece;
-	int movesMade = 0;
-	ETeam team;
-	bool inFocus = false;
-	int squareI;
-	int squareJ;
 
-	int previousI = -1; // -1 means they haven't moved yet
-	int previousJ = -1;
 
 	UPROPERTY(EditAnywhere)
 	float moveSpeed = 10.f;
-	FVector moveTarget{};
-	FVector anchorLocation{};
-	AChessPiecePType* attackTarget;
-	UPROPERTY(EditAnywhere)
-	EPieceState pieceState = EPieceState::Idle;
+
 	UPROPERTY(EditAnywhere)
 	float rotationSpeed = 5.f;
-	FRotator targetRotation;
+	
 	UPROPERTY(EditAnywhere)
 	float postAttackWaitTime = 1.f;
-	float postAttackTime = 0.f;
+
 
 	UPROPERTY(EditAnywhere)
 	float deathCleanUpTime = 1.f;
-	float deathTimer = 0.f;
+
+
+private:
+	int m_MovesMade = 0;
+	ETeam m_Team;
+	bool m_InFocus = false;
+	int m_SquareI;
+	int m_SquareJ;
+
+	int m_PreviousI = -1; // -1 means they haven't moved yet
+	int m_PreviousJ = -1;
+
+	FVector m_MoveTarget{};
+	FVector m_AnchorLocation{};
+	AChessPiecePType* m_AttackTarget;
+
+	EPieceState m_PieceState = EPieceState::Idle;
+
+	FRotator m_TargetRotation;
+
+	float m_PostAttackTime = 0.f;
+
+	float m_DeathTimer = 0.f;
 };

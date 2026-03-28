@@ -28,30 +28,30 @@ void ASquare::Tick(float DeltaTime)
 
 void ASquare::ReceiveCoordinates(int I, int J)
 {
-	i = I;
-	j = J;
+	m_I = I;
+	m_J = J;
 }
 
 void ASquare::ReceivePiece(AChessPiecePType* piece)
 {
-	occupyingPiece = piece;
+	m_OccupyingPiece = piece;
 }
 
 void ASquare::SetIsVacant()
 {
-	occupyingPiece = nullptr;
+	m_OccupyingPiece = nullptr;
 }
 
 bool ASquare::GetIsVacant() const
 {
-	return (!IsValid(occupyingPiece));
+	return (!IsValid(m_OccupyingPiece));
 }
 
 bool ASquare::GetSquareHasKing(ETeam kingsTeam) const
 {
-	if (IsValid(occupyingPiece)) {
-		if (occupyingPiece->GetEPieceType() == EPiece::King) {
-			return (occupyingPiece->GetTeam() == kingsTeam);
+	if (IsValid(m_OccupyingPiece)) {
+		if (m_OccupyingPiece->GetEPieceType() == EPiece::King) {
+			return (m_OccupyingPiece->GetTeam() == kingsTeam);
 		}
 	}
 	return false;
@@ -59,8 +59,8 @@ bool ASquare::GetSquareHasKing(ETeam kingsTeam) const
 
 bool ASquare::GetSquareHasKing() const
 {
-	if (IsValid(occupyingPiece)) {
-		if (occupyingPiece->GetEPieceType() == EPiece::King) {
+	if (IsValid(m_OccupyingPiece)) {
+		if (m_OccupyingPiece->GetEPieceType() == EPiece::King) {
 			return true;
 		}
 	}
@@ -75,8 +75,8 @@ FVector ASquare::GetPieceLocation()
 void ASquare::CheckmateAction()
 {
 	BP_CheckmateAction(); // to blueprints
-	if (occupyingPiece) {
-		occupyingPiece->BP_OnCheckMate();
+	if (m_OccupyingPiece) {
+		m_OccupyingPiece->BP_OnCheckMate();
 	}
 }
 

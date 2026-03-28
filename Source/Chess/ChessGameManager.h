@@ -111,7 +111,6 @@ private:
 	void RecordMoveInHistory(MoveRecord rec);
 
 	ECheckStatus SimulateBoardCheckForCheck(int iToMove, int jToMove, int newI, int newJ, ETeam thisTeam);
-	ECheckStatus CheckCurrentBoardForCheck();
 	bool WouldKingBeInCheck(int moveFromI, int moveFromJ, int moveToI, int moveToJ, ETeam thisTeamKing);
 	bool GetIsCheckMate(ETeam teamInCheck);
 	void OnEventCheckMate(ETeam teamLost);
@@ -149,7 +148,7 @@ protected:
 	TArray<ASquare*> allSquares;
 	AChessPiecePType* pieceInFocus;
 	UPROPERTY(BlueprintReadWrite)
-	TArray<AChessPiecePType*> allPieces; // TODO DL change to TObjectPtr and try
+	TArray<AChessPiecePType*> allPieces;
 
 	UPROPERTY(BlueprintReadOnly)
 	EGameState gameState = EGameState::InbetweenGames;
@@ -161,16 +160,16 @@ protected:
 	bool debugBoard = true;
 
 private:
-	float faceBlack = -180.f;
-	float faceWhite = 0.f;
-	TPair<int, int> whiteKingPos;
-	TPair<int, int> blackKingPos;
-	bool whiteKingInCheck;
-	bool blackKingInCheck;
-	TArray<MoveRecord> movesHistory;
-	FVector benchLocation = { -888, 888, -888 };
+	float m_FaceBlack = -180.f;
+	float m_FaceWhite = 0.f;
+	TPair<int, int> m_WhiteKingPos;
+	TPair<int, int> m_BlackKingPos;
+	bool m_WhiteKingInCheck;
+	bool m_BlackKingInCheck;
+	TArray<MoveRecord> m_MovesHistory;
+	FVector m_BenchLocation = { -888, 888, -888 };
 
-	float checkMateWaitTime = 3.f;
-	float checkMateCounter = 0.f;
+	float m_CheckMateWaitTime = 3.f;
+	float m_CheckMateCounter = 0.f;
 
 };

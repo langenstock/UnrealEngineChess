@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void RemoveAsValidMove();
 	
-	AChessPiecePType* GetOccupyingPiece() const { return occupyingPiece; };
+	AChessPiecePType* GetOccupyingPiece() const { return m_OccupyingPiece; };
 	void SetIsVacant();
 	bool GetIsVacant() const;
 	bool GetSquareHasKing(ETeam kingsTeam) const;
@@ -35,9 +35,9 @@ public:
 	void SetSelectableIndicator(bool visible);
 	
 	UFUNCTION(BlueprintCallable)
-	int GetI() const { return i; };
+	int GetI() const { return m_I; };
 	UFUNCTION(BlueprintCallable)
-	int GetJ() const { return j; };
+	int GetJ() const { return m_J; };
 	FVector GetPieceLocation();
 
 	void CheckmateAction();
@@ -58,8 +58,8 @@ protected:
 	float RandomDirectionF();
 
 protected:
-	int i;
-	int j;
-	bool isFocus = false;
-	AChessPiecePType* occupyingPiece = nullptr;
+	int m_I;
+	int m_J;
+	bool m_IsFocus = false;
+	AChessPiecePType* m_OccupyingPiece = nullptr;
 };

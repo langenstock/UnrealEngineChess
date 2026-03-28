@@ -7,7 +7,7 @@ using KM = UKismetMathLibrary;
 AChessGameManager::AChessGameManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	movesHistory.Reserve(50);
+	m_MovesHistory.Reserve(50);
 }
 
 void AChessGameManager::BeginPlay()
@@ -27,9 +27,9 @@ void AChessGameManager::BeginPlay()
 
 void AChessGameManager::UndoMove(bool switchSides)
 {
-	if (movesHistory.Num() == 0) { return; };
+	if (m_MovesHistory.Num() == 0) { return; };
 
-	MoveRecord r = movesHistory.Last();
+	MoveRecord r = m_MovesHistory.Last();
 	int moveBackToI = r.fromI;
 	int moveBackToJ = r.fromJ;
 
@@ -93,7 +93,7 @@ void AChessGameManager::UndoMove(bool switchSides)
 		}
 	}
 
-	movesHistory.Pop();
+	m_MovesHistory.Pop();
 	if (r.isMoveTwoOfACastling) {
 		UndoMove(false); // a castling is stored as two moves
 	}
@@ -152,7 +152,7 @@ void AChessGameManager::SpawnPiece(int i, int j, TSubclassOf<AChessPiecePType> c
 	p.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	FRotator r{};
-	r.Yaw = team == ETeam::White ? faceBlack : faceWhite;
+	r.Yaw = team == ETeam::White ? m_FaceBlack : m_FaceWhite;
 	UWorld* w = GetWorld();
 	AChessPiecePType* piece = w->SpawnActor<AChessPiecePType>(
 		cls, v, r, p);
@@ -171,12 +171,12 @@ void AChessGameManager::FindAndStoreKingPositions()
 		if (s->GetSquareHasKing(ETeam::White)) {
 			int I = s->GetI();
 			int J = s->GetJ();
-			whiteKingPos = { I, J };
+			m_WhiteKingPos = { I, J };
 		}
 		else if (s->GetSquareHasKing(ETeam::Black)) {
 			int I = s->GetI();
 			int J = s->GetJ();
-			blackKingPos = { I, J };
+			m_BlackKingPos = { I, J };
 		}
 	}
 }
@@ -473,22 +473,6 @@ ECheckStatus AChessGameManager::SimulateBoardCheckForCheck(int iToMove, int jToM
 	return ECheckStatus::None;
 }
 
-ECheckStatus AChessGameManager::CheckCurrentBoardForCheck()
-// TODO DL this funtion is unused ?
-{
-	for (AChessPiecePType* p : allPieces) {
-		TArray<ASquare*> possibleMoves = GetValidMoves(p, false);
-		for (ASquare* s : possibleMoves) {
-			if (s->GetSquareHasKing()) {
-				if (s->GetOccupyingPiece()->GetTeam() == ETeam::White) {
-					return ECheckStatus::WhiteInCheck;
-				}
-				return ECheckStatus::BlackInCheck;
-			}
-		}
-	}
-	return ECheckStatus::None;
-}
 
 bool AChessGameManager::WouldKingBeInCheck(int moveFromI, int moveFromJ, int moveToI, int moveToJ, ETeam thisTeamKing)
 {
@@ -512,10 +496,10 @@ bool AChessGameManager::WouldKingBeInCheck(int moveFromI, int moveFromJ, int mov
 	if (kingHasMoved) {
 		kingThatMovedTeam = pieceToMove->GetTeam();
 		if (kingThatMovedTeam == ETeam::White) {
-			whiteKingPos = { moveToI, moveToJ };
+			m_WhiteKingPos = { moveToI, moveToJ };
 		}
 		else if (kingThatMovedTeam == ETeam::Black) {
-			blackKingPos = { moveToI, moveToJ };
+			m_BlackKingPos = { moveToI, moveToJ };
 		}
 	}
 
@@ -530,20 +514,20 @@ bool AChessGameManager::WouldKingBeInCheck(int moveFromI, int moveFromJ, int mov
 			purgatory->SetIsVacant();
 			if (kingHasMoved) {
 				if (kingThatMovedTeam == ETeam::White) {
-					whiteKingPos = { moveFromI, moveFromJ };
+					m_WhiteKingPos = { moveFromI, moveFromJ };
 				}
 				else if (kingThatMovedTeam == ETeam::Black) {
-					blackKingPos = { moveFromI, moveFromJ };
+					m_BlackKingPos = { moveFromI, moveFromJ };
 				}
 			}
 		};
 
 	TPair<int, int> kingLoc;
 	if (thisTeamKing == ETeam::White) {
-		kingLoc = whiteKingPos;
+		kingLoc = m_WhiteKingPos;
 	}
 	else if (thisTeamKing == ETeam::Black) {
-		kingLoc = blackKingPos;
+		kingLoc = m_BlackKingPos;
 	}
 	ASquare* kingSq = grid[kingLoc.Key][kingLoc.Value];
 
@@ -566,6 +550,9 @@ bool AChessGameManager::WouldKingBeInCheck(int moveFromI, int moveFromJ, int mov
 
 void AChessGameManager::OnClickSquare(AActor* square, int button)
 {
+	ASquare* sq = Cast<ASquare>(square);
+	AChessPiecePType* piece = sq->GetOccupyingPiece();
+
 	if (button == 0) {
 		DeselectAll();
 		if (gameState == EGameState::BlackTurnPieceInFocus) {
@@ -596,8 +583,14 @@ void AChessGameManager::OnClickSquare(AActor* square, int button)
 		}
 		break;
 	case(EGameState::BlackTurnNoSelection):
-		// TODO DL see if there is a piece on this square 
-		// and if so set that to be selected
+		
+		if (piece)
+		{
+			if (piece->GetTeam() == ETeam::Black) {
+				// TODO DL test this behaviour
+				OnClickPiecePlayerTurnNoFocus(piece, 0, ETeam::Black);
+			}
+		}
 		break;
 	case(EGameState::WhiteTurnNoSelection):
 		// TODO DL see if there is a piece on this square 
@@ -763,10 +756,10 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 	// update tracked king positions
 	if (pieceType == EPiece::King) {
 		if (pieceThatMoved->GetTeam() == ETeam::White) {
-			whiteKingPos = { i, j };
+			m_WhiteKingPos = { i, j };
 		}
 		else if (pieceThatMoved->GetTeam() == ETeam::Black) {
-			blackKingPos = {i, j};
+			m_BlackKingPos = {i, j};
 		}
 
 		if (IsSquareValid(previousI, previousJ)) {
@@ -798,10 +791,10 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 
 	TransitionToIdleState();
 	ProcessSquareVacancies();
-	whiteKingInCheck = false;
-	blackKingInCheck = false;
-	ASquare* whiteKingSquare = grid[whiteKingPos.Key][whiteKingPos.Value];
-	ASquare* blackKingSquare = grid[blackKingPos.Key][blackKingPos.Value];
+	m_WhiteKingInCheck = false;
+	m_BlackKingInCheck = false;
+	ASquare* whiteKingSquare = grid[m_WhiteKingPos.Key][m_WhiteKingPos.Value];
+	ASquare* blackKingSquare = grid[m_BlackKingPos.Key][m_BlackKingPos.Value];
 	whiteKingSquare->SetIsInCheck(false);
 	blackKingSquare->SetIsInCheck(false);
 
@@ -816,7 +809,7 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 
 		if (possibleMoves.Contains(whiteKingSquare)) {
 			if (p->GetTeam() == ETeam::Black) {
-				whiteKingInCheck = true;
+				m_WhiteKingInCheck = true;
 				whiteKingSquare->SetIsInCheck(true);
 				if (GetIsCheckMate(ETeam::White)) {
 					OnEventCheckMate(ETeam::White);
@@ -825,7 +818,7 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 		}
 		else if (possibleMoves.Contains(blackKingSquare)) {
 			if (p->GetTeam() == ETeam::White) {
-				blackKingInCheck = true;
+				m_BlackKingInCheck = true;
 				blackKingSquare->SetIsInCheck(true);
 				if (GetIsCheckMate(ETeam::Black)) {
 					OnEventCheckMate(ETeam::Black);
@@ -848,7 +841,7 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 
 void AChessGameManager::RecordMoveInHistory(MoveRecord rec)
 {
-	movesHistory.Push(rec);
+	m_MovesHistory.Push(rec);
 }
 
 bool AChessGameManager::GetIsCheckMate(ETeam teamInCheck)
@@ -1523,7 +1516,7 @@ void AChessGameManager::Tick(float DeltaTime)
 
 	for (AChessPiecePType* p : allPieces) {
 		if (p->GetPieceState() == EPieceState::DeathCleanUp) {
-			p->SetActorLocation(benchLocation);
+			p->SetActorLocation(m_BenchLocation);
 			p->ReceiveCoordinates(-1, -1);
 			allPieces.Remove(p);
 			DeselectAll();
@@ -1533,10 +1526,10 @@ void AChessGameManager::Tick(float DeltaTime)
 	}
 
 	if (gameState == EGameState::Checkmate) {
-		checkMateCounter += DeltaTime;
-		if (checkMateCounter > checkMateWaitTime) {
+		m_CheckMateCounter += DeltaTime;
+		if (m_CheckMateCounter > m_CheckMateWaitTime) {
 			SetGameState(EGameState::InbetweenGames);
-			checkMateCounter = 0.f;
+			m_CheckMateCounter = 0.f;
 		}
 	}
 }
