@@ -751,7 +751,7 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 	ASquare* sq = grid[i][j];
 	sq->ReceivePiece(pieceThatMoved);
 
-	CalculateMoveJiggle(previousI, previousJ, i, j, pieceType);
+	//CalculateMoveJiggle(previousI, previousJ, i, j, pieceType);
 
 	// update tracked king positions
 	if (pieceType == EPiece::King) {
@@ -825,6 +825,10 @@ void AChessGameManager::OnMoveCompleted(AChessPiecePType* pieceThatMoved)
 				}
 			}
 		}
+	}
+
+	if (!m_WhiteKingInCheck && !m_BlackKingInCheck) {
+		NoSquaresInCheck();
 	}
 
 	MoveRecord rec;
@@ -930,6 +934,7 @@ void AChessGameManager::SetGameState(EGameState state)
 	}
 }
 
+// This jiggle behaviour was a holdover from before the pieces actually walked to their target
 void AChessGameManager::CalculateMoveJiggle(int oldI, int oldJ, int newI, int newJ, EPiece pieceType)
 {
 	if (oldI == newI) {
@@ -1533,4 +1538,3 @@ void AChessGameManager::Tick(float DeltaTime)
 		}
 	}
 }
-

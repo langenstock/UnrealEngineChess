@@ -89,8 +89,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void RegisterNewUnit(AChessPiecePType* newPiece);
 
-	//UPROPERTY(EditAnywhere)
-	//AActor* UndoButton;
+	UFUNCTION(BlueprintImplementableEvent)
+	void NoSquaresInCheck();
 
 private:
 	void NewGame();
